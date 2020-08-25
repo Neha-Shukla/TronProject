@@ -2,8 +2,6 @@ import React from "react";
 import TronLinkGuide from "components/TronLinkGuide";
 import TronWeb from "tronweb";
 import Utils from "utils";
-import Swal from "sweetalert2";
-import Content from "./Content";
 
 import "./App.scss";
 
@@ -170,9 +168,9 @@ class App extends React.Component {
    const rewardWallet = (await Utils.contract.rewardWallet().call()).toNumber();
    const levelRewardWallet = (await Utils.contract.levelRewardWallet().call()).toNumber();
     console.log("totalUsers",totalUsers);
-    console.log("totalAmountDistributed",totalAmountDistributed);
-    console.log("rewardWallet",rewardWallet);
-    console.log("levelRewardWallet",levelRewardWallet);
+    console.log("totalAmountDistributed",totalAmountDistributed/1000000);
+    console.log("rewardWallet",rewardWallet/1000000);
+    console.log("levelRewardWallet",levelRewardWallet/1000000);
   }
 
   async Register(id) {
@@ -187,6 +185,10 @@ class App extends React.Component {
       .then((receipt) => {
           console.log("success");
         console.log(receipt);
+      }).then(()=>{
+        if(this.state.levelFund >= this.state.levelsPrice[this.state.levelsPurchased+1]){
+          this.autoBuyLevel();
+        }
       }).catch((err)=>{
           console.log("error while registering user",err);
       })
@@ -238,6 +240,14 @@ class App extends React.Component {
         const levelsPurchased = res.levelsPurchased.toNumber();
         const loss = res.loss.toNumber;
 
+        this.setState({
+          inviter:inviter,
+          totalReferals:totalReferals,
+          totalRecycles:totalRecycles,
+          totalWins:totalWins,
+          levelsPurchased:levelsPurchased,
+          loss:loss
+        })
         console.log(
           "inviter",
           inviter,
@@ -261,15 +271,23 @@ class App extends React.Component {
       .getUsersIncomes(id)
       .call()
       .then((res) => {
-        let directIncome = res.directIncome.toNumber();
-        let rewardIncome = res.rewardIncome.toNumber();
-        let levelIncome = res.levelIncome.toNumber();
-        let recycleIncome = res.recycleIncome.toNumber();
-        let upgradeIncome = res.upgradeIncome.toNumber();
-        let levelRewardIncome = res.levelRewardIncome.toNumber();
+        let directIncome = res.directIncome.toNumber()/1000000;
+        let rewardIncome = res.rewardIncome.toNumber()/1000000;
+        let levelIncome = res.levelIncome.toNumber()/1000000;
+        let recycleIncome = res.recycleIncome.toNumber()/1000000;
+        let upgradeIncome = res.upgradeIncome.toNumber()/1000000;
+        let levelRewardIncome = res.levelRewardIncome.toNumber()/1000000;
 
+        this.setState({
+          directIncome:directIncome,
+          rewardIncome:rewardIncome,
+          levelIncome:levelIncome,
+          recycleIncome:recycleIncome,
+          upgradeIncome:upgradeIncome,
+          levelRewardIncome:levelRewardIncome
+        })
         console.log("directIncome",directIncome);
-        console.log("ewardIncome",rewardIncome);
+        console.log("rewardIncome",rewardIncome);
         console.log("levelIncome",levelIncome);
         console.log("recycleIncome",recycleIncome);
         console.log("upgradeIncome",upgradeIncome);
@@ -282,18 +300,31 @@ class App extends React.Component {
       .getUsersFundsAndUserAddress(id)
       .call()
       .then((res) => {
-        let levelFund = res.levelFund.toNumber();
-        let recycleFund = res.recycleFund.toNumber();
+        let levelFund = res.levelFund.toNumber()/1000000;
+        let recycleFund = res.recycleFund.toNumber()/1000000;
+        let add = res.add;
 
+        this.setState({
+          levelFund:levelFund,
+          recycleFund:recycleFund,
+          add:add
+        })
         console.log(levelFund);
         console.log(recycleFund);
+        console.log(add);
       });
   }
 
   async getReferrals(id){
       
       Utils.contract.viewUserReferral(id).call().then((res)=>{
-          console.log(res);
+        for(let i=0;i<res.length;i++){
+          console.log(res[i].toNumber());
+        }
+          
+          // console.log(res[1].toNumber());
+          // console.log(res[2].toNumber());
+          
       }).catch((err)=>{
           console.log("error while fetching referrals",err);
       })
@@ -409,11 +440,11 @@ class App extends React.Component {
         </div>
 
         <div className="col-lg-12 text-center">
-        <input type="text" id="input4" />
+        <input type="text" id="input5" />
           <button
             onClick={(e) => {
               e.preventDefault();
-              this.getReferrals(document.getElementById("input4").value);
+              this.getReferrals(document.getElementById("input5").value);
             }}
           >
            View Referrals
@@ -421,15 +452,15 @@ class App extends React.Component {
         </div>
 
         <div className="col-lg-12 text-center">
-        <input type="text" id="input5" placeholder="winner1"/>
-        <input type="text" id="input6" placeholder="winner2"/>
-        <input type="text" id="input7" placeholder="winner3"/>
+        <input type="text" id="input6" placeholder="winner1"/>
+        <input type="text" id="input7" placeholder="winner2"/>
+        <input type="text" id="input8" placeholder="winner3"/>
           <button
             onClick={(e) => {
               e.preventDefault();
-              const id1 = document.getElementById("input5").value;
-              const id2 = document.getElementById("input6").value;
-              const id3 = document.getElementById("input7").value
+              const id1 = document.getElementById("input6").value;
+              const id2 = document.getElementById("input7").value;
+              const id3 = document.getElementById("input8").value
               this.distributeReward(id1,id2,id3);
             }}
           >

@@ -24,6 +24,7 @@ contract MLM {
         bool isExist;
         uint256 loss;
         bool getLevelReward;
+        uint256[] usersAtLevels;
     }
  
     struct UserIncomes{
@@ -39,6 +40,7 @@ contract MLM {
         uint256 recycleFund;
         uint256 levelFund;
     }
+
 
 
     uint256[] public levels;
@@ -476,8 +478,8 @@ contract MLM {
     function getLevelsPurchased(uint256 _id) public view returns(uint256){
         return users[users_ids[_id]].levelsPurchased;
     }
-    function viewUserReferral(uint256 _id) public view returns(address[] memory) {
-        return users[users_ids[_id]].referral;
+    function viewUserReferral(uint256 _id) public view returns(uint256[] memory) {
+        return users[users_ids[_id]].referralsIds;
     }
     
     function setUplines(uint256 _id) public{
