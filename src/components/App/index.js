@@ -185,10 +185,6 @@ class App extends React.Component {
       .then((receipt) => {
           console.log("success");
         console.log(receipt);
-      }).then(()=>{
-        if(this.state.levelFund >= this.state.levelsPrice[this.state.levelsPurchased+1]){
-          this.autoBuyLevel();
-        }
       }).catch((err)=>{
           console.log("error while registering user",err);
       })
@@ -302,13 +298,13 @@ class App extends React.Component {
       .then((res) => {
         let levelFund = res.levelFund.toNumber()/1000000;
         let recycleFund = res.recycleFund.toNumber()/1000000;
-        let add = res.add;
+        let add = TronWeb.address.fromHex(res.add);
 
-        this.setState({
-          levelFund:levelFund,
-          recycleFund:recycleFund,
-          add:add
-        })
+        // this.setState({
+        //   levelFund:levelFund,
+        //   recycleFund:recycleFund,
+        //   add:add
+        // })
         console.log(levelFund);
         console.log(recycleFund);
         console.log(add);
