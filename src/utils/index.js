@@ -1,4 +1,4 @@
-const contractAddress = 'TLT2ngcTzV12WTv1q6kQT4kM8s1ah666k9'
+const contractAddress = 'TK43tXeMuTQ1Hjs1zzkw9Ku634v3yWgBKc'
 
 const utils = {
     tronWeb: false,
@@ -8,7 +8,6 @@ const utils = {
         this.tronWeb = tronWeb;
         this.contract = await tronWeb.contract().at(contractAddress)
     },
-
 };
 
 export default utils;

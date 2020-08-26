@@ -35,6 +35,8 @@ class App extends React.Component {
     this.distributeLevelReward = this.distributeLevelReward.bind(this);
     this.getLevelWinners = this.getLevelWinners.bind(this);
     this.setLevelWinners = this.setLevelWinners.bind(this);
+    this.withDrawlevelFund = this.withDrawlevelFund.bind(this);
+    this.withdrawDistributionWallet = this.withdrawDistributionWallet.bind(this);
   }
 
   async componentDidMount() {
@@ -116,6 +118,7 @@ class App extends React.Component {
     this.startBuyLevelEventListner();
     this.setState({ loading: false });
     this.setState({ account: window.tronWeb.defaultAddress.base58 });
+    
   }
 
   startRegisterEventListener() {
@@ -185,6 +188,9 @@ class App extends React.Component {
       .then((receipt) => {
           console.log("success");
         console.log(receipt);
+        if(receipt.error){
+          alert("Error");
+        }
       }).catch((err)=>{
           console.log("error while registering user",err);
       })
@@ -203,6 +209,9 @@ class App extends React.Component {
       })
       .then((receipt) => {
         console.log(receipt);
+        if(receipt.error){
+          alert("Error");
+        }
       })
       .catch((err) => {
         console.log("error in buying ", err);
@@ -217,6 +226,9 @@ class App extends React.Component {
       })
       .then((receipt) => {
         console.log(receipt);
+        if(receipt.error){
+          alert("Error");
+        }
       })
       .catch((err) => {
         console.log("error in recycling", err);
@@ -228,13 +240,16 @@ class App extends React.Component {
       .getUserInfo(id)
       .call()
       .then((res) => {
+        if(res.error){
+          alert("Error");
+        }
         // console.log(res);
         const inviter = TronWeb.address.fromHex(res.inviter);
         const totalReferals = res.totalReferals.toNumber();
         const totalRecycles = res.totalRecycles.toNumber();
         const totalWins = res.totalWins.toNumber();
         const levelsPurchased = res.levelsPurchased.toNumber();
-        const loss = res.loss.toNumber;
+        const loss = res.loss.toNumber()/1000000;
 
         this.setState({
           inviter:inviter,
@@ -254,7 +269,9 @@ class App extends React.Component {
           "totalWins",
           totalWins,
           "levelsPurchased",
-          levelsPurchased
+          levelsPurchased,
+          "loss",
+          loss
         );
       })
       .catch((err) => {
@@ -296,15 +313,15 @@ class App extends React.Component {
       .getUsersFundsAndUserAddress(id)
       .call()
       .then((res) => {
-        let levelFund = res.levelFund.toNumber()/1000000;
-        let recycleFund = res.recycleFund.toNumber()/1000000;
+        let levelFund = res.levelFund.toNumber();
+        let recycleFund = res.recycleFund.toNumber();
         let add = TronWeb.address.fromHex(res.add);
 
-        // this.setState({
-        //   levelFund:levelFund,
-        //   recycleFund:recycleFund,
-        //   add:add
-        // })
+        this.setState({
+          levelFund:levelFund,
+          recycleFund:recycleFund,
+          add:add
+        })
         console.log(levelFund);
         console.log(recycleFund);
         console.log(add);
@@ -368,7 +385,24 @@ class App extends React.Component {
       console.log("error while fetching winners",err);
   })
   }
-  render() {
+
+  async withDrawlevelFund()
+  {
+    Utils.contract.withDrawlevelFund().send({callValue:0,shouldPollResponse:true}).then((res)=>{
+      console.log(res);
+  }).catch((err)=>{
+      console.log("error while withdrawing",err);
+  })
+  }
+
+  async withdrawDistributionWallet(){
+    Utils.contract.withDrawDistributeLevelFund().send({callValue:0,shouldPollResponse:true}).then((res)=>{
+      console.log(res);
+  }).catch((err)=>{
+      console.log("error while withdrawing",err);
+  })
+  }
+    render() {
     if (!this.state.tronWeb.installed) return <TronLinkGuide />;
 
     if (!this.state.tronWeb.loggedIn) return <TronLinkGuide installed />;
@@ -517,6 +551,27 @@ class App extends React.Component {
           >
             Get Level Winners
           </button>
+
+          <div className="col-lg-12 text-center">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              this.withDrawlevelFund();
+            }}
+          >
+            withDrawlevelFund
+          </button>
+            </div>
+          <div className="col-lg-12 text-center">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              this.withdrawDistributionWallet();
+            }}
+          >
+            withdrawDistributionWallet
+          </button>
+          </div>
         </div>
       </div>
     );
